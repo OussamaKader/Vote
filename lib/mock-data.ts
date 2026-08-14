@@ -1,0 +1,190 @@
+import type { Election, Profile, Vote } from "@/types";
+
+export const mockProfiles: Profile[] = [
+  {
+    id: "user-1",
+    full_name: "Amina Diop",
+    email: "amina@campus.fr",
+    role: "user",
+    is_active: true,
+    created_at: "2025-09-12T09:00:00.000Z",
+  },
+  {
+    id: "admin-1",
+    full_name: "Mamadou Sarr",
+    email: "admin@campus.fr",
+    role: "admin",
+    is_active: true,
+    created_at: "2025-08-05T08:00:00.000Z",
+  },
+];
+
+export const mockElections: Election[] = [
+  {
+    id: "election-1",
+    title: "Élection du Conseil des Étudiants",
+    description: "Vote pour choisir les représentants étudiants pour l'année académique.",
+    start_date: "2026-08-10T00:00:00.000Z",
+    end_date: "2026-08-26T23:59:59.000Z",
+    status: "open",
+    results_visible: true,
+    created_at: "2026-08-01T00:00:00.000Z",
+    updated_at: "2026-08-10T00:00:00.000Z",
+    lists: [
+      {
+        id: "list-1",
+        election_id: "election-1",
+        name: "Liste Avenir",
+        description: "Engagement pour l’innovation, le développement étudiant et la transparence.",
+        logo_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-08-02T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-1",
+            list_id: "list-1",
+            name: "Sofia Martin",
+            photo_url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=300&q=80",
+            position: "Présidente",
+            description: "Membre active du conseil scientifique.",
+            created_at: "2026-08-02T00:00:00.000Z",
+          },
+          {
+            id: "candidate-2",
+            list_id: "list-1",
+            name: "Karim Bensalem",
+            photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+            position: "Vice-président",
+            description: "Spécialiste en projets associatifs.",
+            created_at: "2026-08-02T00:00:00.000Z",
+          },
+        ],
+      },
+      {
+        id: "list-2",
+        election_id: "election-1",
+        name: "Liste Impact",
+        description: "Projets concrets, campus inclusif et services étudiants mieux adaptés.",
+        logo_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-08-02T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-3",
+            list_id: "list-2",
+            name: "Nadia Lemaire",
+            photo_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+            position: "Présidente",
+            description: "Focus sur la qualité de vie étudiante.",
+            created_at: "2026-08-03T00:00:00.000Z",
+          },
+        ],
+      },
+      {
+        id: "list-3",
+        election_id: "election-1",
+        name: "Liste Rêve",
+        description: "Un modèle de gouvernance axé sur l’écoute et les initiatives étudiants.",
+        logo_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-08-03T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-4",
+            list_id: "list-3",
+            name: "Amine Diallo",
+            photo_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
+            position: "Président",
+            description: "Pragmatique et proche des étudiants.",
+            created_at: "2026-08-03T00:00:00.000Z",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "election-2",
+    title: "Élection de la représentation sportive",
+    description: "Choisir les responsables de la vie associative sportive et culturelle.",
+    start_date: "2026-07-01T00:00:00.000Z",
+    end_date: "2026-07-15T23:59:59.000Z",
+    status: "closed",
+    results_visible: true,
+    created_at: "2026-06-20T00:00:00.000Z",
+    updated_at: "2026-07-15T00:00:00.000Z",
+    lists: [
+      {
+        id: "list-4",
+        election_id: "election-2",
+        name: "Liste Sport +",
+        description: "Des événements sportifs plus accessibles et une meilleure inclusion.",
+        logo_url: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-06-21T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-5",
+            list_id: "list-4",
+            name: "Mélanie Dupré",
+            photo_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+            position: "Responsable sportive",
+            description: "Mène des projets autour du sport et du bien-être.",
+            created_at: "2026-06-21T00:00:00.000Z",
+          },
+        ],
+      },
+      {
+        id: "list-5",
+        election_id: "election-2",
+        name: "Liste Énergie",
+        description: "Un esprit dynamique orienté culture et performance.",
+        logo_url: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-06-22T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-6",
+            list_id: "list-5",
+            name: "Yassine Kheiri",
+            photo_url: "https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=300&q=80",
+            position: "Chef de mission",
+            description: "Promoteur de la culture sportive étudiante.",
+            created_at: "2026-06-22T00:00:00.000Z",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "election-3",
+    title: "Élection du bureau associatif",
+    description: "Pour désigner l’équipe chargée du pilotage des projets associatifs.",
+    start_date: "2026-08-26T00:00:00.000Z",
+    end_date: "2026-09-10T23:59:59.000Z",
+    status: "upcoming",
+    results_visible: false,
+    created_at: "2026-08-12T00:00:00.000Z",
+    updated_at: "2026-08-12T00:00:00.000Z",
+    lists: [
+      {
+        id: "list-6",
+        election_id: "election-3",
+        name: "Liste Campus Unis",
+        description: "Un programme centré sur la solidarité et le développement des clubs.",
+        logo_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=300&q=80",
+        created_at: "2026-08-12T00:00:00.000Z",
+        candidates: [
+          {
+            id: "candidate-7",
+            list_id: "list-6",
+            name: "Célia Boutin",
+            photo_url: "https://images.unsplash.com/photo-1546961329-78bef0414d7c?auto=format&fit=crop&w=300&q=80",
+            position: "Secrétaire",
+            description: "Accorde une grande importance à l’organisation des clubs.",
+            created_at: "2026-08-12T00:00:00.000Z",
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const mockVotes: Vote[] = [
+  { id: "vote-1", election_id: "election-1", list_id: "list-1", user_id: "user-1", created_at: "2026-08-18T00:00:00.000Z" },
+  { id: "vote-2", election_id: "election-2", list_id: "list-5", user_id: "user-1", created_at: "2026-07-06T00:00:00.000Z" },
+];
