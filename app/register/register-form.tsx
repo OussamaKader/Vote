@@ -110,7 +110,7 @@ export default function RegisterForm() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={form.confirmPassword}
                   onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                  placeholder="Confirmez votre mot de passe"
+                  placeholder="Confirmez"
                   className="pr-10"
                   required
                 />

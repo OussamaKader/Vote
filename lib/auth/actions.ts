@@ -1,7 +1,6 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { normalizeWhatsapp } from "@/lib/validation";
@@ -179,21 +178,34 @@ export async function loginUser(
       .maybeSingle();
 
     if (queryError) {
-      return { error: `Erreur lors de la recherche: ${queryError.message}` };
+      console.error("loginUser query error:", queryError);
+
+      return {
+        error: `Erreur lors de la recherche: ${queryError.message}`,
+      };
     }
 
     if (!profile) {
-      return { error: "Ce numéro WhatsApp n'existe pas." };
+      return {
+        error: "Ce numéro WhatsApp n'existe pas.",
+      };
     }
 
     if (!profile.is_active) {
-      return { error: "Ce compte est désactivé." };
+      return {
+        error: "Ce compte est désactivé.",
+      };
     }
 
-    const passwordValid = await bcrypt.compare(password, profile.password_hash);
+    const passwordValid = await bcrypt.compare(
+      password,
+      profile.password_hash,
+    );
 
     if (!passwordValid) {
-      return { error: "Mot de passe incorrect." };
+      return {
+        error: "Mot de passe incorrect.",
+      };
     }
 
     const sessionData = {
@@ -204,27 +216,36 @@ export async function loginUser(
     };
 
     const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(sessionData), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: SESSION_DURATION / 1000,
-      path: "/",
-    });
+
+    cookieStore.set(
+      SESSION_COOKIE_NAME,
+      JSON.stringify(sessionData),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: SESSION_DURATION / 1000,
+        path: "/",
+      },
+    );
 
     console.log("SESSION COOKIE CREATED");
+    console.log("USER ID:", profile.id);
+    console.log("USER ROLE:", profile.role);
 
-    if (profile.role === "admin") {
-      redirect("/admin");
-    }
-
-    redirect("/");
+    return {
+      success: true,
+      profile: profile as Profile,
+    };
   } catch (err) {
-    if (err instanceof Error && "digest" in err && typeof err.digest === "string" && err.digest === "NEXT_REDIRECT") {
-      throw err;
-    }
+    console.error("loginUser error:", err);
 
-    return { error: err instanceof Error ? err.message : "Erreur serveur" };
+    return {
+      error:
+        err instanceof Error
+          ? err.message
+          : "Erreur serveur lors de la connexion.",
+    };
   }
 }
 
