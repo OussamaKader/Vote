@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
 import { createClient } from "@supabase/supabase-js";
 import { ArrowRight, CheckCircle2, BarChart2, Vote, Flag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

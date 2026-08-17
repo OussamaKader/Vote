@@ -90,7 +90,41 @@ export async function updateUserProfileAdmin(
     return { error: err instanceof Error ? err.message : "Erreur serveur" };
   }
 }
+export async function getCurrentProfile(): Promise<Profile | null> {
+  try {
+    const session = await getSessionUser();
 
+    if (!session?.userId) {
+      return null;
+    }
+
+    const supabase = createAdminSupabaseClient();
+
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", session.userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("getCurrentProfile error:", error);
+      return null;
+    }
+
+    if (!profile) {
+      return null;
+    }
+
+    if (!profile.is_active) {
+      return null;
+    }
+
+    return profile as Profile;
+  } catch (error) {
+    console.error("getCurrentProfile error:", error);
+    return null;
+  }
+}
 export async function deleteUserProfileAdmin(profileId: string) {
   try {
     const supabase = createAdminSupabaseClient();
