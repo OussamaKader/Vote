@@ -10,19 +10,19 @@ export function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-export function computeElectionStatus(startDate: string, endDate: string): "upcoming" | "open" | "closed" {
+export function computeElectionStatus(startDate: string, endDate: string): "upcoming" | "active" | "finished" {
   const now = new Date();
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   if (now < start) return "upcoming";
-  if (now >= start && now <= end) return "open";
-  return "closed";
+  if (now >= start && now <= end) return "active";
+  return "finished";
 }
 
-export function getStatusLabel(status: "upcoming" | "open" | "closed") {
+export function getStatusLabel(status: "upcoming" | "active" | "finished") {
   if (status === "upcoming") return "À venir";
-  if (status === "open") return "En cours";
+  if (status === "active") return "En cours";
   return "Terminée";
 }
 

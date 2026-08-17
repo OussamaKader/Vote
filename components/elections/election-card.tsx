@@ -12,19 +12,23 @@ export function ElectionCard({ election }: { election: Election }) {
   const listsCount = election.lists?.length ?? 0;
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="min-w-0 overflow-hidden">
       <div className="relative h-40 w-full bg-slate-100">
         <Image
-          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+          src="/election-vote.png"
           alt={election.title}
           fill
           className="object-cover"
         />
       </div>
       <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="text-xl font-semibold text-slate-900">{election.title}</h3>
-          <Badge className="bg-blue-50 text-blue-700">{getStatusLabel(status)}</Badge>
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="min-w-0 flex-1 break-words text-xl font-semibold leading-tight text-slate-900">
+            {election.title}
+          </h3>
+          <Badge className="shrink-0 whitespace-nowrap border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700">
+            {getStatusLabel(status)}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
