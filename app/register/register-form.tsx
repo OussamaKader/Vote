@@ -42,13 +42,19 @@ export default function RegisterForm() {
 
       if (result.error) {
         setError(result.error);
+        setLoading(false);
         return;
       }
 
+      /*
+       * On NE remet PAS loading à false ici volontairement :
+       * la navigation vers /login va se produire, donc on
+       * garde le bouton en état "chargement" jusqu'au
+       * changement de page, pour éviter le flash rapide.
+       */
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur lors de l'inscription.");
-    } finally {
       setLoading(false);
     }
   };
@@ -69,6 +75,7 @@ export default function RegisterForm() {
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
                 placeholder="Oussama Mohamed lemine"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -79,6 +86,7 @@ export default function RegisterForm() {
                 onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })}
                 placeholder="212 ou 222 suivi du numéro"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -92,11 +100,13 @@ export default function RegisterForm() {
                   placeholder="Minimum 8 caractères"
                   className="pr-10"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -113,11 +123,13 @@ export default function RegisterForm() {
                   placeholder="Confirmez"
                   className="pr-10"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
                 >
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

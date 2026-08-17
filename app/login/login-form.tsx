@@ -47,6 +47,7 @@ export default function LoginForm() {
           validation.error.issues[0]?.message ??
             "Vérifiez vos identifiants.",
         );
+        setLoading(false);
         return;
       }
 
@@ -60,17 +61,24 @@ export default function LoginForm() {
           result.error ||
             "Erreur serveur lors de la connexion.",
         );
+        setLoading(false);
         return;
       }
 
       if (!result.success || !result.profile) {
         setError("Profil utilisateur introuvable.");
+        setLoading(false);
         return;
       }
 
       /*
        * La redirection est faite UNIQUEMENT ici.
        * loginUser() ne fait plus de redirect().
+       *
+       * On NE remet PAS loading à false ici volontairement :
+       * la page va changer, donc on garde le bouton en
+       * état "chargement" jusqu'à la navigation, pour
+       * éviter l'effet de flash rapide du bouton.
        */
       const destination =
         result.profile.role === "admin"
@@ -86,7 +94,6 @@ export default function LoginForm() {
           ? err.message
           : "Erreur serveur lors de la connexion.",
       );
-    } finally {
       setLoading(false);
     }
   };

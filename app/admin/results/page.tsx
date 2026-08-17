@@ -30,6 +30,22 @@ export default async function AdminResultsPage() {
     .select("id, election_id, list_id, user_id")
     .order("created_at", { ascending: false });
 
+  // Bureau exécutif : on récupère tous les candidats de toutes les listes,
+  // puis on les regroupe par list_id pour pouvoir retrouver ceux de la
+  // liste gagnante de chaque élection.
+  const { data: candidates = [] } = await supabase
+    .from("candidates")
+    .select("id, list_id, name, position")
+    .order("id", { ascending: true });
+
+  const candidatesByListId = new Map<string, { name: string; position: string | null }[]>();
+  for (const candidate of candidates ?? []) {
+    const key = String(candidate.list_id);
+    const current = candidatesByListId.get(key) ?? [];
+    current.push({ name: candidate.name, position: candidate.position ?? null });
+    candidatesByListId.set(key, current);
+  }
+
   const electionMeta = new Map<string, any>(
     electionList.map((election: any) => [String(election.id), election])
   );
@@ -44,6 +60,21 @@ export default async function AdminResultsPage() {
       listNameById,
     })
   );
+
+  // Pour chaque résultat, on rassemble les candidats de la (ou des, en cas
+  // d'égalité) liste(s) gagnante(s) — c'est le "Bureau exécutif élu".
+  const boardMembersByResultId = new Map<
+    string,
+    { name: string; position: string | null }[]
+  >();
+
+  for (const result of electionResults) {
+    const winningRows = result.rows.filter((row: any) => row.is_winner);
+    const members = winningRows.flatMap(
+      (row: any) => candidatesByListId.get(String(row.list_id)) ?? []
+    );
+    boardMembersByResultId.set(String(result.id), members);
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -121,7 +152,10 @@ export default async function AdminResultsPage() {
 
                   <div className="flex items-center justify-end">
                     {result.total_votes > 0 ? (
-                      <SingleResultPdfExport result={result} />
+                      <SingleResultPdfExport
+                        result={result}
+                        boardMembers={boardMembersByResultId.get(String(result.id)) ?? []}
+                      />
                     ) : (
                       <span className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500">
                         Aucun résultat

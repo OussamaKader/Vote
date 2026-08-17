@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Footer } from "@/components/layout/footer";
+import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -31,8 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-full bg-slate-50 text-slate-900">
-        <div className="min-h-screen pb-14">{children}</div>
-        <Footer />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

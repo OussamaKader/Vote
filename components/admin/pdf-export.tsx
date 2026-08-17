@@ -5,6 +5,7 @@ import type { ElectionResultSummary } from "@/lib/election-results";
 import { Download } from "lucide-react";
 import autoTable from "jspdf-autotable";
 import jsPDF from "jspdf";
+import { ASSOCIATION_LOGO_BASE64 } from "./logo";
 
 export type VoteExportRow = {
   id: string | number;
@@ -14,6 +15,11 @@ export type VoteExportRow = {
   list_name: string;
   user_name: string;
   created_at: string;
+};
+
+export type BoardMember = {
+  name: string;
+  position: string | null;
 };
 
 function formatDateTime(value: string | Date) {
@@ -33,24 +39,101 @@ function formatDateTime(value: string | Date) {
   }).format(date);
 }
 
-function addPdfHeader(doc: jsPDF, title: string, subtitle: string, generatedAt: string) {
+function addPdfHeader(
+  doc: jsPDF,
+  title: string,
+  subtitle: string,
+  generatedAt: string,
+  options?: { showLogo?: boolean },
+) {
   const pageWidth = doc.internal.pageSize.getWidth();
+  const showLogo = options?.showLogo ?? true;
+  const logoSize = 40;
+  const logoX = 22;
+  const logoY = 12;
+  // Le texte se décale à droite du logo quand celui-ci est affiché.
+  const textX = showLogo ? logoX + logoSize + 12 : 22;
 
   doc.setFillColor(37, 99, 235);
   doc.rect(0, 0, pageWidth, 64, "F");
 
+  if (showLogo) {
+    try {
+      // jsPDF ne respecte pas toujours le canal alpha des PNG (le fond
+      // transparent peut réapparaître en blanc à l'export). Pour obtenir
+      // un logo parfaitement circulaire quel que soit le rendu du PNG,
+      // on découpe l'image avec un clip path circulaire natif à jsPDF
+      // plutôt que de compter sur la transparence de l'image elle-même.
+      const cx = logoX + logoSize / 2;
+      const cy = logoY + logoSize / 2;
+      const radius = logoSize / 2;
+
+      doc.saveGraphicsState();
+      doc.circle(cx, cy, radius, null as unknown as string);
+      doc.clip();
+      doc.discardPath();
+      doc.addImage(ASSOCIATION_LOGO_BASE64, "PNG", logoX, logoY, logoSize, logoSize);
+      doc.restoreGraphicsState();
+    } catch {
+      // Si le logo ne peut pas être chargé, on continue sans bloquer l'export.
+    }
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(21);
-  doc.text("VoteCampus", 22, 28);
+  doc.text("VoteCampus", textX, 28);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text(title, 22, 46);
+  doc.text(title, textX, 46);
 
   doc.setTextColor(219, 234, 254);
   doc.text(`Généré le ${generatedAt}`, pageWidth - 180, 28);
   doc.text(subtitle, pageWidth - 180, 46);
+}
+
+/**
+ * Dessine une grille de "cases d'information" (façon procès-verbal papier) :
+ * un fond gris clair, un label en majuscule, et une valeur en gras.
+ * `items` est réparti en `columns` colonnes de largeur égale.
+ */
+function drawInfoBoxes(
+  doc: jsPDF,
+  items: { label: string; value: string }[],
+  startY: number,
+  pageWidth: number,
+  columns = 2,
+) {
+  const margin = 22;
+  const gap = 10;
+  const boxHeight = 34;
+  const usableWidth = pageWidth - margin * 2;
+  const boxWidth = (usableWidth - gap * (columns - 1)) / columns;
+
+  items.forEach((item, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    const x = margin + col * (boxWidth + gap);
+    const y = startY + row * (boxHeight + gap);
+
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(x, y, boxWidth, boxHeight, 4, 4, "FD");
+
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(item.label.toUpperCase(), x + 10, y + 13);
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(item.value, x + 10, y + 26);
+  });
+
+  const rows = Math.ceil(items.length / columns);
+  return startY + rows * (boxHeight + gap);
 }
 
 export function VotesPdfExport({ votes }: { votes: VoteExportRow[] }) {
@@ -63,7 +146,7 @@ export function VotesPdfExport({ votes }: { votes: VoteExportRow[] }) {
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
     const generatedAt = formatDateTime(new Date());
 
-    addPdfHeader(doc, "VoteCampus — Liste des votes", "Administration", generatedAt);
+    addPdfHeader(doc, "AEM-MAROC — Liste des votes", "Administration", generatedAt);
 
     doc.setTextColor(15, 23, 42);
     doc.setFontSize(10);
@@ -187,27 +270,57 @@ export function ResultsPdfExport({ results }: { results: ElectionResultSummary[]
   );
 }
 
-export function SingleResultPdfExport({ result }: { result: ElectionResultSummary }) {
+export function SingleResultPdfExport({
+  result,
+  boardMembers = [],
+}: {
+  result: ElectionResultSummary;
+  boardMembers?: BoardMember[];
+}) {
   const handleDownload = () => {
     if (!result.total_votes) {
       window.alert("Aucune donnée de vote pour cette élection.");
       return;
     }
 
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    // Format "procès-verbal" : portrait, cases d'information, tableau des
+    // résultats, puis tableau du bureau exécutif élu (liste gagnante).
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
     const generatedAt = formatDateTime(new Date());
+    const participationRate =
+      result.total_voters > 0 ? (result.total_votes / result.total_voters) * 100 : 0;
 
-    addPdfHeader(doc, `VoteCampus — Résultats — ${result.title}`, "Élection", generatedAt);
+    addPdfHeader(doc, `Procès-verbal — ${result.title}`, "Résultats de l'élection", generatedAt);
 
+    // --- Cases d'information --------------------------------------------
+    let cursorY = drawInfoBoxes(
+      doc,
+      [
+        { label: "Votants inscrits", value: String(result.total_voters) },
+        { label: "Votes exprimés", value: String(result.total_votes) },
+        { label: "Taux de participation", value: `${participationRate.toFixed(1)}%` },
+        {
+          label: result.isTie ? "Résultat" : "Liste gagnante",
+          value: result.winner || "-",
+        },
+      ],
+      82,
+      pageWidth,
+      2,
+    );
+
+    cursorY += 10;
+
+    // --- Tableau des résultats --------------------------------------------
     doc.setTextColor(15, 23, 42);
-    doc.setFontSize(10);
-    doc.text(`Total de votants : ${result.total_voters}`, 22, 90);
-    doc.text(`Total de votes : ${result.total_votes}`, 220, 90);
-    doc.text(`${result.isTie ? "Résultat :" : "Liste gagnante :"} ${result.winner || "-"}`, 440, 90);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Résultats du scrutin", 22, cursorY);
 
     autoTable(doc, {
-      startY: 110,
-      head: [["Liste / Candidat", "Nombre de votes", "Pourcentage", "Classement"]],
+      startY: cursorY + 10,
+      head: [["Liste / Candidat", "Voix", "Pourcentage", "Classement"]],
       body: result.rows.map((row) => [
         row.list_name || "-",
         String(row.vote_count),
@@ -216,7 +329,7 @@ export function SingleResultPdfExport({ result }: { result: ElectionResultSummar
       ]),
       theme: "grid",
       styles: {
-        fontSize: 8,
+        fontSize: 9,
         cellPadding: 6,
         overflow: "linebreak",
       },
@@ -228,9 +341,53 @@ export function SingleResultPdfExport({ result }: { result: ElectionResultSummar
       alternateRowStyles: {
         fillColor: [248, 250, 252],
       },
+      margin: { left: 22, right: 22 },
     });
 
-    doc.save(`VoteCampus-resultats-${result.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    let afterResultsY = ((doc as any).lastAutoTable?.finalY ?? cursorY + 10) + 24;
+
+    // --- Bureau exécutif élu ----------------------------------------------
+    if (boardMembers.length > 0) {
+      // Nouvelle page si on n'a plus assez de place pour le titre + au
+      // moins quelques lignes du tableau.
+      const pageHeight = doc.internal.pageSize.getHeight();
+      if (afterResultsY > pageHeight - 140) {
+        doc.addPage();
+        afterResultsY = 40;
+      }
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Bureau exécutif élu", 22, afterResultsY);
+
+      autoTable(doc, {
+        startY: afterResultsY + 10,
+        head: [["Poste", "Nom complet"]],
+        body: boardMembers.map((member) => [member.position || "-", member.name || "-"]),
+        theme: "grid",
+        styles: {
+          fontSize: 9,
+          cellPadding: 6,
+          overflow: "linebreak",
+        },
+        headStyles: {
+          fillColor: [37, 99, 235],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        margin: { left: 22, right: 22 },
+      });
+    }
+
+    doc.save(
+      `VoteCampus-resultats-${result.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${new Date()
+        .toISOString()
+        .slice(0, 10)}.pdf`,
+    );
   };
 
   return (
