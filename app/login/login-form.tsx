@@ -87,6 +87,23 @@ export default function LoginForm() {
 
       window.location.assign(destination);
     } catch (err) {
+      /*
+       * Protection défensive : Next.js utilise en interne une
+       * exception spéciale pour implémenter redirect(). Si jamais
+       * cette exception remonte jusqu'ici (par ex. si un redirect()
+       * est appelé quelque part dans la chaîne de la Server Action),
+       * elle NE DOIT PAS être traitée comme une vraie erreur.
+       * On l'identifie via son "digest" qui commence par "NEXT_REDIRECT".
+       */
+      const digest = (err as { digest?: string } | null | undefined)
+        ?.digest;
+
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+        // C'est une redirection Next.js normale, on ne fait rien
+        // (la navigation va se produire toute seule).
+        return;
+      }
+
       console.error("Login error:", err);
 
       setError(
