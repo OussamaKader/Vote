@@ -82,7 +82,7 @@ function addPdfHeader(
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(21);
-  doc.text("VoteCampus", textX, 28);
+  doc.text("Association des Étudiants Mauritaniens au Maroc", textX, 28);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
@@ -180,7 +180,7 @@ export function VotesPdfExport({ votes }: { votes: VoteExportRow[] }) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(51, 65, 85);
-        doc.text("VoteCampus — Liste des votes", 22, finalY);
+        doc.text("Association des Étudiants Mauritaniens au Maroc (AEM-MAROC)", 22, finalY);
       },
     });
 
