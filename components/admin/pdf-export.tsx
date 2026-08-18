@@ -178,7 +178,7 @@ export function VotesPdfExport({ votes }: { votes: VoteExportRow[] }) {
       didDrawPage: (data) => {
         const finalY = (data.cursor?.y ?? 0) + 12;
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(9);
+        doc.setFontSize(6);
         doc.setTextColor(51, 65, 85);
         doc.text("Association des Étudiants Mauritaniens au Maroc (AEM-MAROC)", 22, finalY);
       },
