@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VoteCampus",
-  description: "Plateforme professionnelle de vote en ligne",
+title: "AEM-MAROC",
+  description: "Une plateforme numérique dédiée aux élections de l’AEM-MAROC, pour un vote transparent, sécurisé et accessible à tous.",
   icons: {
     icon: "/favicon.ico",
   },

@@ -30,12 +30,16 @@ export function Sidebar() {
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between gap-3 py-3 md:h-16 md:py-0">
           <Link href="/admin" className="flex min-w-0 items-center gap-3 text-slate-900">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-              <ShieldCheck className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center sm:h-12 sm:w-12">
+              <img
+                src="/logo.png"
+                alt="AEM Logo"
+                className="h-full w-full object-contain drop-shadow-sm"
+              />
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-blue-700">Admin</p>
-              <span className="truncate text-base font-semibold">VoteCampus</span>
+              <span className="truncate text-base font-semibold">AEM-MAROC</span>
             </div>
           </Link>
 
