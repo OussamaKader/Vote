@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -71,15 +72,6 @@ export default function LoginForm() {
         return;
       }
 
-      /*
-       * La redirection est faite UNIQUEMENT ici.
-       * loginUser() ne fait plus de redirect().
-       *
-       * On NE remet PAS loading à false ici volontairement :
-       * la page va changer, donc on garde le bouton en
-       * état "chargement" jusqu'à la navigation, pour
-       * éviter l'effet de flash rapide du bouton.
-       */
       const destination =
         result.profile.role === "admin"
           ? "/admin"
@@ -87,20 +79,10 @@ export default function LoginForm() {
 
       window.location.assign(destination);
     } catch (err) {
-      /*
-       * Protection défensive : Next.js utilise en interne une
-       * exception spéciale pour implémenter redirect(). Si jamais
-       * cette exception remonte jusqu'ici (par ex. si un redirect()
-       * est appelé quelque part dans la chaîne de la Server Action),
-       * elle NE DOIT PAS être traitée comme une vraie erreur.
-       * On l'identifie via son "digest" qui commence par "NEXT_REDIRECT".
-       */
       const digest = (err as { digest?: string } | null | undefined)
         ?.digest;
 
       if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-        // C'est une redirection Next.js normale, on ne fait rien
-        // (la navigation va se produire toute seule).
         return;
       }
 
@@ -118,14 +100,25 @@ export default function LoginForm() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <Card className="w-full max-w-md p-2 shadow-lg">
-        <CardHeader>
-          <h1 className="text-3xl font-bold text-slate-900">
-            Connexion
-          </h1>
+        <CardHeader className="flex flex-col items-center gap-3">
+          {/* Logo AEM-Maroc */}
+          <Image
+            src="/logo.png"
+            alt="AEM-Maroc"
+            width={80}
+            height={80}
+            className="object-contain"
+            priority
+          />
 
-          <p className="mt-2 text-sm text-slate-600">
-            Connectez-vous avec votre numéro WhatsApp.
-          </p>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-slate-900">
+              Connexion
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Connectez-vous avec votre numéro WhatsApp.
+            </p>
+          </div>
         </CardHeader>
 
         <CardContent>

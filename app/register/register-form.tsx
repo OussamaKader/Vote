@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -46,12 +47,6 @@ export default function RegisterForm() {
         return;
       }
 
-      /*
-       * On NE remet PAS loading à false ici volontairement :
-       * la navigation vers /login va se produire, donc on
-       * garde le bouton en état "chargement" jusqu'au
-       * changement de page, pour éviter le flash rapide.
-       */
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur lors de l'inscription.");
@@ -62,10 +57,25 @@ export default function RegisterForm() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <Card className="w-full max-w-md p-2 shadow-lg">
-        <CardHeader>
-          <h1 className="text-3xl font-bold text-slate-900">Créer un compte</h1>
-          <p className="mt-2 text-sm text-slate-600">Inscrivez-vous avec votre nom et votre numéro WhatsApp.</p>
+        <CardHeader className="flex flex-col items-center gap-3">
+          {/* Logo AEM-Maroc */}
+          <Image
+            src="/logo.png"
+            alt="AEM-Maroc"
+            width={80}
+            height={80}
+            className="object-contain"
+            priority
+          />
+
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-slate-900">Créer un compte</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Inscrivez-vous avec votre nom et votre numéro WhatsApp.
+            </p>
+          </div>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-5 p-5">
             <div className="space-y-2">
