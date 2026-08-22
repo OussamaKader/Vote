@@ -60,6 +60,10 @@ export default async function AdminResultsPage() {
       listNameById,
     })
   );
+  // Après les autres requêtes Supabase
+  const { count: totalUsers } = await supabase
+    .from("users")  // adapte au nom de ta table
+    .select("*", { count: "exact", head: true });
 
   // Pour chaque résultat, on rassemble les candidats de la (ou des, en cas
   // d'égalité) liste(s) gagnante(s) — c'est le "Bureau exécutif élu".
@@ -155,6 +159,7 @@ export default async function AdminResultsPage() {
                       <SingleResultPdfExport
                         result={result}
                         boardMembers={boardMembersByResultId.get(String(result.id)) ?? []}
+                        totalUsers={totalUsers ?? 0}  // 👈 ajout
                       />
                     ) : (
                       <span className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500">

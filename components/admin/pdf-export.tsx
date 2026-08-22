@@ -682,9 +682,11 @@ export function ResultsPdfExport({
 export function SingleResultPdfExport({
   result,
   boardMembers = [],
+  totalUsers = 0,
 }: {
   result: ElectionResultSummary;
   boardMembers?: BoardMember[];
+  totalUsers?: number;
 }) {
   const [description, setDescription] = useState("");
 
@@ -716,10 +718,8 @@ export function SingleResultPdfExport({
       formatDateTime(new Date());
 
     const participationRate =
-      result.total_voters > 0
-        ? (result.total_votes /
-          result.total_voters) *
-        100
+      totalUsers > 0
+        ? (result.total_votes / totalUsers) * 100
         : 0;
 
     // Header
@@ -751,31 +751,22 @@ export function SingleResultPdfExport({
       doc,
       [
         {
-          label: "Votants inscrits",
-          value: String(
-            result.total_voters,
-          ),
+          label: "Électeurs inscrits",
+          value: String(totalUsers),
         },
 
         {
           label: "Votes exprimés",
-          value: String(
-            result.total_votes,
-          ),
+          value: String(result.total_votes),
         },
 
         {
           label: "Taux de participation",
-          value: `${participationRate.toFixed(
-            1,
-          )}%`,
+          value: `${participationRate.toFixed(1)}%`,
         },
 
         {
-          label: result.isTie
-            ? "Résultat"
-            : "Liste gagnante",
-
+          label: result.isTie ? "Résultat" : "Liste gagnante",
           value: result.winner || "-",
         },
       ],
@@ -803,7 +794,7 @@ export function SingleResultPdfExport({
     doc.setFontSize(12);
 
     doc.text(
-      "Résultats de l’élection",
+      "Résultats de l'élection",
       22,
       cursorY,
     );
