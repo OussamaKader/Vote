@@ -30,9 +30,6 @@ export default async function AdminResultsPage() {
     .select("id, election_id, list_id, user_id")
     .order("created_at", { ascending: false });
 
-  // Bureau exécutif : on récupère tous les candidats de toutes les listes,
-  // puis on les regroupe par list_id pour pouvoir retrouver ceux de la
-  // liste gagnante de chaque élection.
   const { data: candidates = [] } = await supabase
     .from("candidates")
     .select("id, list_id, name, position")
@@ -45,6 +42,13 @@ export default async function AdminResultsPage() {
     current.push({ name: candidate.name, position: candidate.position ?? null });
     candidatesByListId.set(key, current);
   }
+
+  // Nombre total d'électeurs inscrits
+  const { count: totalUsers } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true });
+
+  const totalUsersCount = totalUsers ?? 0;
 
   const electionMeta = new Map<string, any>(
     electionList.map((election: any) => [String(election.id), election])
@@ -60,13 +64,7 @@ export default async function AdminResultsPage() {
       listNameById,
     })
   );
-  // Après les autres requêtes Supabase
-  const { count: totalUsers } = await supabase
-  .from("profiles") // ou "students", "members", etc.
-  .select("*", { count: "exact", head: true });
 
-  // Pour chaque résultat, on rassemble les candidats de la (ou des, en cas
-  // d'égalité) liste(s) gagnante(s) — c'est le "Bureau exécutif élu".
   const boardMembersByResultId = new Map<
     string,
     { name: string; position: string | null }[]
@@ -159,7 +157,7 @@ export default async function AdminResultsPage() {
                       <SingleResultPdfExport
                         result={result}
                         boardMembers={boardMembersByResultId.get(String(result.id)) ?? []}
-                        totalUsers={totalUsers ?? 0}  // 👈 ajout
+                        totalUsers={totalUsersCount}
                       />
                     ) : (
                       <span className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500">
@@ -183,7 +181,7 @@ export default async function AdminResultsPage() {
                           </th>
 
                           <th className="px-3 py-3 text-xs uppercase tracking-[0.2em] sm:px-4">
-                            Pourcentage
+                            % des inscrits
                           </th>
 
                           <th className="px-3 py-3 text-xs uppercase tracking-[0.2em] sm:px-4">
@@ -207,7 +205,9 @@ export default async function AdminResultsPage() {
                             </td>
 
                             <td className="px-3 py-3 sm:px-4">
-                              {row.percentage.toFixed(1)}%
+                              {totalUsersCount > 0
+                                ? ((row.vote_count / totalUsersCount) * 100).toFixed(1)
+                                : row.percentage.toFixed(1)}%
                             </td>
 
                             <td className="px-3 py-3 sm:px-4">
