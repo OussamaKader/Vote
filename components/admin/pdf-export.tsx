@@ -426,11 +426,11 @@ export function SingleResultPdfExport({
 
     autoTable(doc, {
       startY: cursorY + 10,
-      head: [["Liste / Candidat", "Voix", "Pourcentage", "Classement"]],
+      head: [["Liste / Candidat", "Voix", "% des inscrits", "Classement"]],
       body: result.rows.map((row) => [
         row.list_name || "-",
         String(row.vote_count),
-        `${row.percentage.toFixed(1)}%`,
+        `${totalUsers > 0 ? ((row.vote_count / totalUsers) * 100).toFixed(1) : row.percentage.toFixed(1)}%`,  // ✅ % sur totalUsers
         `#${row.rank}`,
       ]),
       theme: "grid",
