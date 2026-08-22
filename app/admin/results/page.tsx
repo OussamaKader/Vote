@@ -62,8 +62,8 @@ export default async function AdminResultsPage() {
   );
   // Après les autres requêtes Supabase
   const { count: totalUsers } = await supabase
-    .from("users")  // adapte au nom de ta table
-    .select("*", { count: "exact", head: true });
+  .from("profiles") // ou "students", "members", etc.
+  .select("*", { count: "exact", head: true });
 
   // Pour chaque résultat, on rassemble les candidats de la (ou des, en cas
   // d'égalité) liste(s) gagnante(s) — c'est le "Bureau exécutif élu".
